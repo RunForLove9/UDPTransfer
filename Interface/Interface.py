@@ -4,7 +4,7 @@ from abc import abstractmethod
 class Subject(object):
     def __init__(self):
         self.observers = []
-        self.status = -1
+        self.status = None
 
     def attach(self, observer):
         self.observers.append(observer)

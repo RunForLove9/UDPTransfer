@@ -12,4 +12,3 @@ if __name__ == '__main__':
     print('Server waiting...')
     while True:
         task, back_ack, mes, address, data = server.wait()
-
