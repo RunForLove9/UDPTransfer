@@ -36,8 +36,6 @@ class ClientUDP(UDPTransferProtocol):
 
 
 c = ClientUDP()
-
-
 def send():
     c.send(mes='start connect', mes_id=0)
     observer = SendMesObserver(c.failed_mes_manager)
