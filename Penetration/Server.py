@@ -19,11 +19,11 @@ class ServerUDP(UDPTransferProtocol):
         else:
             super().send(mes, address, socket)
 
-    def wait(self, socket=None, address=None, ack=0):
-        if socket is None or address is None:
-            return super().wait(self.socket, address=(self.SERVER_IP, self.SERVER_PORT), ack=ack)
+    def wait(self, socket=None):
+        if socket is None:
+            return super().wait(self.socket)
         else:
-            return super().wait(socket=socket, address=address, ack=ack)
+            return super().wait(socket=socket)
 
 
     def close(self):
