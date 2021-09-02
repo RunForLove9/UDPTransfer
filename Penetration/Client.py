@@ -1,3 +1,4 @@
+import os
 import random
 import socket
 import threading
@@ -37,9 +38,20 @@ class ClientUDP(UDPTransferProtocol):
 
 c = ClientUDP()
 def send():
-    c.send(mes='start connect', mes_id=0)
+
+    mes=b'start connect'
+    mes = mes.decode('utf-8')
+    c.send(mes, mes_id=0)
+    # data = None
+    # with open('./bg.jpg', 'rb') as f:
+    #     data = f.read()
+    #     print(data)
+    #     data = data.decode('utf-8')
+    #     print(data)
+    #     c.send()
     observer = SendMesObserver(c.failed_mes_manager)
     c.failed_mes_manager.attach(observer)
+    c.send(mes=b'fuck you man!', mes_id=random.randint(0, 2048))
     while True:
         send_mes = input("You has ")
         if send_mes == "-1":
@@ -50,9 +62,42 @@ def send():
             c.send(mes=send_mes, mes_id=random.randint(0, 2048))
 
 
-
-
 threading.Thread(target=send).start()
+# data = None
+# with open('./bg.jpg', 'rb') as f:
+#     data = f.read()
+#     print(data)
+#     # data = data.decode('utf-8')
+#     print(type(data))
+#     print(len(data))
+#     i = 4
+#     b = bytes(i)
+#     print(i)
+#     print(b)
+#     k = i.to_bytes(8, 'big')
+#     k = bytearray(k)
+#     print(k)
+#     print(len(k))
+#
+#     print(i.from_bytes(k, 'big'))
+#     print('-------------')
+#     other = "append".encode('utf-8')
+#     print(k)
+#     print(other)
+#     print('-------------')
+#     k.extend(other)
+#     print(k)
+#
+#     x = 128
+#
+#     print(x.to_bytes(2, 'big'))
+#     ar = '-1.'.encode('utf-8')
+#     print(ar)
+#     m = bytearray(ar)
+#     print(len(ar))
+#     print(ar[:1])
+
+# print('acb'.encode('utf-8'))
 
 time.sleep(0.1)
 while True:
