@@ -23,13 +23,12 @@ class MesManager(Subject):
             if index >= len(self.mes):
                 raise UDPTransferException("ReceiveMesManager", "Remove a erorr index...")
             else:
-                self.mes.pop(index)
+                self.mes.remove(index)
         if len(self.mes) >= 1000:
             jsonstr = json.dumps(self.mes)
             with open(r'./SendMesLog.json', 'a') as f:
                 f.write(jsonstr)
             self.mes.clear()
-
         self.notify()
 
 class FailedMesManager(Subject):
@@ -64,7 +63,7 @@ class SendMesObserver(IObservers):
         self.subject = subject
 
     def update(self):
-        print("A message is failed send...")
+        print("A message is added to manager...")
         print(self.subject.mes)
 
 class UDPTransferException(Exception):  # 继承异常类

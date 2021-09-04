@@ -17,6 +17,8 @@ class UDPTransferProtocol(object):
     mutex = threading.Lock()
     REPEAT_TIME = 0.5
     SEND_FAILED_TIME = 2.0
+    TEST_CONNECT_MES_ID = 20000
+
     receive_mes_manager = MesManager()
     send_mes_manager = MesManager()
     failed_mes_manager = FailedMesManager()
@@ -29,8 +31,8 @@ class UDPTransferProtocol(object):
     str2 正常消息内容
     '''
 
-    def send(self, mes, address, socket, mes_id=0):
-        thread = threading.Thread(target=self.send_help, args=(mes, address, socket, 1, mes_id))
+    def send(self, mes, address, socket, mes_id=0, is_byte=2):
+        thread = threading.Thread(target=self.send_help, args=(mes, address, socket, 1, mes_id, is_byte))
         thread.start()
         # 如果没有收到回执，则重发消息，时间
 
@@ -65,12 +67,13 @@ class UDPTransferProtocol(object):
             else:
                 send_mark = False
                 self.failed_mes_manager.change(operation="add", mes_id=mes_id, value=(mes, address))
-                print("We can't connect with server, please check your network......................")
+                print("We can't connect with server, please check your network......................", mes)
                 self.mutex.acquire()  # 上锁
                 self.mes_queue.pop(ack)
                 self.mutex.release()  # 释放
                 break
         if send_mark is True and task == 1:
+            # value 中的1代表发送成功， 2 代表发送失败
             self.send_mes_manager.change(operation="add", value=(1, mes_id, mes, address))
             print("send a mes : ", mes)
         elif send_mark is False and task == 1:
@@ -79,7 +82,7 @@ class UDPTransferProtocol(object):
         return send_mark
 
     def sendAck(self, ack, address, socket, task=2, mes_id=0, is_byte=2, mes_type=1):
-        task = 2
+        task = task
         ack = ack
         mes = ack
         # mess = ".".join([str(task), str(ack), mes])
@@ -191,6 +194,28 @@ class UDPTransferProtocol(object):
                 self.receive_mes_queue[back_ack] = (-1, mes, back_address, socket)
                 threading.Thread(self.sendAck(back_ack, back_address, socket)).start()
         return task, back_ack, mes, back_address, data
+
+    def connectTest(self, address, socket, mes='test connect...', task=1, mes_id=TEST_CONNECT_MES_ID, is_byte=2, mes_type=1):
+
+        self.send(mes=mes, address=address, socket=socket, mes_id=mes_id)
+        time.sleep(1.0)
+        is_send = 2
+        for index, message in enumerate(self.send_mes_manager.mes):
+            mesId = message[1]
+            if mesId == mes_id:
+                print('find a target -> ', message)
+                # 删除需要开绿删除多个，下标位移
+                self.send_mes_manager.change(operation='pop', index=index)
+        for index, message in enumerate(self.send_mes_manager.mes):
+            mesId = message[1]
+            if mesId == mes_id:
+                is_send = mes[0]
+                break
+        if is_send == 1:
+            return True
+        else:
+            return False
+
 
 
 class UDPTransferException(Exception):  # 继承异常类

@@ -6,11 +6,13 @@ import time
 
 from ConcreteClass.MessageSubject import SendMesObserver
 from Penetration.MesHandle import UDPTransferProtocol
+from Penetration.UDPFileSender import UDPFileSender
 
 
 class ClientUDP(UDPTransferProtocol):
     SERVER_PORT = 20000
     SERVER_IP = "127.0.0.1"
+    TEST_CONNECT_MES_ID = 20000
 
     def __init__(self, server_ip=SERVER_IP, listen_port=SERVER_PORT):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -35,11 +37,22 @@ class ClientUDP(UDPTransferProtocol):
     def close(self):
         self.socket.close()
 
+    def connectTest(self, address=None, socket=None, mes='test connect...', task=1, mes_id=TEST_CONNECT_MES_ID,
+                    is_byte=2, mes_type=1):
+        if address is None or socket is None:
+            result = super().connectTest(address=(self.SERVER_IP, self.SERVER_PORT), socket=self.socket, mes=mes,
+                                         task=task, mes_id=mes_id, is_byte=is_byte, mes_type=mes_type)
+        else:
+            result = super().connectTest(address=address, socket=socket, mes=mes, task=task, mes_id=mes_id,
+                                         is_byte=is_byte, mes_type=mes_type)
+        return result
+
 
 c = ClientUDP()
-def send():
 
-    mes=b'start connect'
+
+def send():
+    mes = b'start connect'
     mes = mes.decode('utf-8')
     c.send(mes, mes_id=0)
     # data = None
@@ -51,7 +64,7 @@ def send():
     #     c.send()
     observer = SendMesObserver(c.failed_mes_manager)
     c.failed_mes_manager.attach(observer)
-    c.send(mes=b'fuck you man!', mes_id=random.randint(0, 2048))
+    # c.send(mes=b'fuck you man!', mes_id=random.randint(0, 2048))
     while True:
         send_mes = input("You has ")
         if send_mes == "-1":
@@ -60,7 +73,11 @@ def send():
             print(c.send_mes_manager.mes)
         else:
             c.send(mes=send_mes, mes_id=random.randint(0, 2048))
-
+        print('---' * 20)
+        # print(c.send_mes_manager.mes)
+        # print(c.connectTest())
+        print(c.connectTest())
+        print('---' * 20)
 
 threading.Thread(target=send).start()
 # data = None
@@ -99,6 +116,10 @@ threading.Thread(target=send).start()
 
 # print('acb'.encode('utf-8'))
 
+# sender = UDPFileSender(c)
+# print(sender.readFile2bytes(r'./demo.txt'))
+
 time.sleep(0.1)
+
 while True:
     c.wait()
